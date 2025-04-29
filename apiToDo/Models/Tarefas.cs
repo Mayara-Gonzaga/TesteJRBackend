@@ -7,63 +7,120 @@ namespace apiToDo.Models
 {
     public class Tarefas
     {
+        
+        private static readonly List<TarefaDTO> _tarefas = new List<TarefaDTO>
+        {
+            new TarefaDTO { ID_TAREFA = 1458, DS_TAREFA = "Tarefa Inicial" } 
+            
+        };
+
+        
         public List<TarefaDTO> lstTarefas()
         {
             try
             {
-                List<TarefaDTO> lstTarefas = new List<TarefaDTO>();
-
-                lstTarefas.Add(new TarefaDTO
-                {
-                    ID_TAREFA = 1,
-                    DS_TAREFA = "Fazer Compras"
-                });
-
-                lstTarefas.Add(new TarefaDTO
-                {
-                    ID_TAREFA = 2,
-                    DS_TAREFA = "Fazer Atividad Faculdade"
-                });
-
-                lstTarefas.Add(new TarefaDTO
-                {
-                    ID_TAREFA = 3,
-                    DS_TAREFA = "Subir Projeto de Teste no GitHub"
-                });
-
-                return new List<TarefaDTO>();
+                return _tarefas; 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("Erro ao listar tarefas.", ex); 
             }
         }
 
-
-        public void InserirTarefa(TarefaDTO Request)
+        
+        public List<TarefaDTO> InserirTarefa(TarefaDTO request)
         {
             try
             {
-                List<TarefaDTO> lstResponse = lstTarefas();
-                lstResponse.Add(Request);
+                
+                if (request == null || string.IsNullOrEmpty(request.DS_TAREFA))
+                {
+                    throw new ArgumentException("A descrição da tarefa é obrigatória.");
+                }
+
+                
+                request.ID_TAREFA = _tarefas.Any() ? _tarefas.Max(t => t.ID_TAREFA) + 1 : 1;
+                _tarefas.Add(request); 
+                return _tarefas; 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("Erro ao inserir tarefa.", ex);
             }
         }
-        public void DeletarTarefa(int ID_TAREFA)
+
+        
+        public List<TarefaDTO> DeletarTarefa(int ID_TAREFA)
         {
             try
             {
-                List<TarefaDTO> lstResponse = lstTarefas();
-                var Tarefa = lstResponse.FirstOrDefault(x => x.ID_TAREFA == ID_TAREFA);
-                TarefaDTO Tarefa2 = lstResponse.Where(x=> x.ID_TAREFA == Tarefa.ID_TAREFA).FirstOrDefault();
-                lstResponse.Remove(Tarefa2);
+                
+                var tarefa = _tarefas.FirstOrDefault(x => x.ID_TAREFA == ID_TAREFA);
+
+                
+                if (tarefa == null)
+                {
+                    throw new KeyNotFoundException($"Tarefa com ID {ID_TAREFA} não encontrada.");
+                }
+
+                
+                _tarefas.Remove(tarefa);
+
+                
+                return _tarefas;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                throw ex;
+                throw new Exception($"Erro ao deletar tarefa com ID {ID_TAREFA}.", ex);
+            }
+        }
+
+        
+        public List<TarefaDTO> AtualizarTarefa(int ID_TAREFA, TarefaDTO request)
+        {
+            try
+            {
+                
+                if (request == null || string.IsNullOrEmpty(request.DS_TAREFA))
+                {
+                    throw new ArgumentException("A descrição da tarefa é obrigatória.");
+                }
+
+                
+                var tarefa = _tarefas.FirstOrDefault(x => x.ID_TAREFA == ID_TAREFA);
+                if (tarefa == null)
+                {
+                    throw new KeyNotFoundException($"Tarefa com ID {ID_TAREFA} não encontrada.");
+                }
+
+                
+                tarefa.DS_TAREFA = request.DS_TAREFA;
+
+               
+                return _tarefas;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao atualizar tarefa com ID {ID_TAREFA}.", ex);
+            }
+        }
+
+        
+        public TarefaDTO ObterTarefa(int ID_TAREFA)
+        {
+            try
+            {
+               
+                var tarefa = _tarefas.FirstOrDefault(x => x.ID_TAREFA == ID_TAREFA);
+                if (tarefa == null)
+                {
+                    throw new KeyNotFoundException($"Tarefa com ID {ID_TAREFA} não encontrada.");
+                }
+                return tarefa;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao obter tarefa com ID {ID_TAREFA}.", ex);
             }
         }
     }
